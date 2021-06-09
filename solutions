@@ -177,3 +177,161 @@ module top_module (
     
 endmodule
 ...............................................................................................
+Gates100
+Build a combinational circuit with 100 inputs, in[99:0].
+
+There are 3 outputs:
+
+  1)  out_and: output of a 100-input AND gate.
+  2)  out_or: output of a 100-input OR gate.
+  3)  out_xor: output of a 100-input XOR gate.
+  
+  code:
+  module top_module( 
+    input [99:0] in,
+    output out_and,
+    output out_or,
+    output out_xor 
+);
+    assign out_and	=&in;
+	assign out_or	=|in;
+    assign out_xor =^in;
+endmodule
+.......................................................................................
+Vector100r
+Given a 100-bit input vector [99:0], reverse its bit ordering. 
+
+code:
+module top_module( 
+    input [99:0] in,
+    output [99:0] out
+);
+  
+    integer i;
+    always@(*)
+        begin
+    for(i=0;i<=99;i++)
+         out[99-i]=in[i];           //note here that no "assign" statement is used as it can't be used inside a procedural block
+        end
+endmodule
+
+another code:
+module top_module (
+	input [99:0] in,
+	output reg [99:0] out                                                       // here note that output is made reg data type in module declaration
+);
+	
+	always @(*) begin
+		for (int i=0;i<$bits(out);i++)		// $bits() is a system function that returns the width of a signal.
+			out[i] = in[$bits(out)-i-1];	// $bits(out) is 100 because out is 100 bits wide.
+	end
+	
+endmodule
+..................................................................................................................
+Popcount255
+A "population count" circuit counts the number of '1's in an input vector. Build a population count circuit for a 255-bit input vector. 
+
+
+My code:
+
+module top_module( 
+    input [254:0] in,
+    output [7:0] out );                 // out is storing the count in 8 bit binary
+    
+   
+    reg [7:0] count;                                    
+    always @(*) 
+        begin
+        count=0;
+    
+        for (int i=0;i<$bits(in);i++)		
+            if 	(in[i]==1'b1)
+               count++;
+  	end
+    
+    assign out=count;
+
+endmodule
+
+authors code:
+
+module top_module (
+	input [254:0] in,
+	output reg [7:0] out                                                // note that out is made a reg type
+);
+
+	always @(*) begin	// Combinational always block
+		out = 0;
+		for (int i=0;i<255;i++)
+			out = out + in[i];
+	end
+	
+endmodule
+....................................................................................................
+Adder100i
+Create a 100-bit binary ripple-carry adder by instantiating 100 full adders. 
+The adder adds two 100-bit numbers and a carry-in to produce a 100-bit sum and carry out.
+To encourage you to actually instantiate full adders, also output the carry-out from each full adder in the ripple-carry adder. 
+cout[99] is the final carry-out from the last full adder, and is the carry-out you usually see.
+
+code:
+    module FA(
+    	input a,b,
+    	input cin,
+    	output cout,sum);
+	
+    	assign sum  = a^b^cin;
+    	assign cout = (a&b)|(b&cin)|(cin&a);
+	endmodule
+
+module top_module( 
+    input [99:0] a, b,
+    input cin,
+    output [99:0] cout,
+    output [99:0] sum );
+
+    
+    
+    genvar i;
+    generate   
+        for(i=0;i<100;i++) 
+        begin: Full_adder_block
+            if (i==0)
+                FA a1(.a(a[i]),.b(b[i]),.cin(cin),.cout(cout[i]),.sum(sum[i]));                     // i==0 is instantiated separately because it has cin as cin of our top module while others have cout of previous as cin which can be generalised.
+                                                                                                   // here a1 name is same for both i==0 and others, otherwise it will throw error
+            else
+                FA a1(.a(a[i]),.b(b[i]),.cin(cout[i-1]),.cout(cout[i]),.sum(sum[i]));
+        end
+    endgenerate
+endmodule
+
+
+or if you want to name the FA module for i==0 differently other than a1 then instantiate it outside the generate block (also not that genarate block has name otherwise it will ask to name the block)
+
+other way to code it:
+module FA(
+    input a,b,
+    input cin,
+    output cout,sum);
+	
+    assign sum  = a^b^cin;
+    assign cout = (a&b)|(b&cin)|(cin&a);
+endmodule
+
+module top_module( 
+    input [99:0] a, b,
+    input cin,
+    output [99:0] cout,
+    output [99:0] sum );
+
+    genvar i;
+    
+    FA FA1(a[0],b[0],cin,cout[0],sum[0]);
+    generate
+        for (i=1; i<100; i=i+1) begin : Full_adder_block
+        FA FA(a[i],b[i],cout[i-1],cout[i],sum[i]);
+    end
+    endgenerate
+endmodule
+
+....................................................................................................................
