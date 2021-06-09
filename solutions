@@ -335,3 +335,61 @@ module top_module(
 endmodule
 
 ....................................................................................................................
+Bcdadd100
+You are provided with a BCD one-digit adder named bcd_fadd that adds two BCD digits and carry-in, and produces a sum and carry-out.
+
+module bcd_fadd {
+    input [3:0] a,
+    input [3:0] b,
+    input     cin,
+    output   cout,
+    output [3:0] sum );
+
+Instantiate 100 copies of bcd_fadd to create a 100-digit BCD ripple-carry adder. Your adder should add two 100-digit BCD numbers (packed into 400-bit vectors) and a carry-in to produce a 100-digit sum and carry out. 
+
+code:
+module top_module( 
+    input [399:0] a, b,
+    input cin,
+    output cout,
+    output [399:0] sum );
+    
+    wire [98:0]intcout;
+    genvar i;
+    bcd_fadd FA1(a[3:0],b[3:0],cin,intcout[0],sum[3:0]);
+     generate
+         for (i=4; i<=392; i=i+4) begin : BCD_adder_block					// caution: i=i+4 is written instead of i=i+1
+             bcd_fadd a1(a[i+3:i],b[i+3:i],intcout[(i/4)-1],intcout[i/4],sum[i+3:i]);
+    end
+    endgenerate
+    bcd_fadd a2(a[399:396],b[399:396],intcout[98],cout,sum[399:396]);                  // Note that cout is used instead of extra wire such as intcout[99], otherwise atlast assign cout=intcout[99] has to be done.
+
+endmodule
+
+another way to do it:
+
+module top_module( 
+    input [399:0] a, b,
+    input cin,
+    output cout,
+    output [399:0] sum );
+	
+    wire [99:0]intcout;
+    genvar i;
+    
+    generate
+        bcd_fadd FA(a[3:0], b[3:0], cin, intcout[0],sum[3:0]);      				// you write this statement outside generate or inside generate it hardly matters as long as instantiation is proper.
+        for (i=4; i<400; i=i+4) begin: bcd_adder_block
+            bcd_fadd a1(a[i+3:i], b[i+3:i], intcout[i/4-1],intcout[i/4],sum[i+3:i]);
+        end
+    endgenerate
+    
+    assign cout = intcout[99];					/// here you can see that cout is assigned with extra wire intcout[99] which can be avoided if last instance was written separately.
+endmodule
+......................................................................................................................................................................
+
+
+
+
+
+
