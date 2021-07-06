@@ -416,6 +416,9 @@ Design hint: When designing circuits, one often has to think of the problem "bac
 
 The above problem description is written in an imperative form suitable for software programming (if ring then do this), so you must convert it to a more declarative form suitable for hardware implementation (assign ringer = ___). Being able to think in, and translate between, both styles is one of the most important skills needed for hardware design. 
 
+ANALYSIS of the statement
+First statement tells that when ring is 1 then either ringer will be 1 or the motor but not both. So how to decide which one will be on and when. This is revealed in the second statement.
+Second statement says that now out of the motor and ringer when vibrate mode is 1 then make motor=1 else make ringer=1(when vibrate mode is 0)>>> during this second statement remember that ring is still 1. 
 
 i.e ringer is 1 when vibrate mode is off and (compulsion) ring mode is on
 motor is 1 when both vibrate mode and (compulsion) ring mode is on.
@@ -439,5 +442,5 @@ module top_module (
         assign motor= vibrate_mode&ring;
 
 endmodule
-............................................................................/
+............................................................................
 
