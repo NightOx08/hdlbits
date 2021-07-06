@@ -419,6 +419,14 @@ The above problem description is written in an imperative form suitable for soft
 
 i.e ringer is 1 when vibrate mode is off and (compulsion) ring mode is on
 motor is 1 when both vibrate mode and (compulsion) ring mode is on.
+	
+---------------------------------
+	     ring=1
+---------------------------------
+vibrate mode=1 | vibrate mode=0
+-------------- |-----------------
+   motor=1     |    ringer=1
+---------------------------------
 code:
 
 module top_module (
